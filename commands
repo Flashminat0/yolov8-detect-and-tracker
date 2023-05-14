@@ -1,0 +1,1 @@
+python track.py --yolo-weights yolov8n.pt --reid-weights osnet_x0_25_msmt17.pt --source 0 --save-vid
