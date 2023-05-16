@@ -41,6 +41,44 @@ from yolov8.ultralytics.yolo.utils.ops import Profile, non_max_suppression, scal
     process_mask_native
 from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
 from trackers.multi_tracker_zoo import create_tracker
+from itertools import combinations
+
+
+def compute_iou(box1, box2):
+    """Compute the Intersection over Union (IoU) of two bounding boxes.
+
+    Parameters
+    ----------
+    box1 : list, tuple
+        List of coordinates (x1, y1, x2, y2) of box 1.
+    box2 : list, tuple
+        List of coordinates (x1, y1, x2, y2) of box 2.
+
+    Returns
+    -------
+    float
+        IoU of box1 and box2. The IoU is a measure of overlap between two bounding boxes.
+    """
+    x1 = max(box1[0], box2[0])
+    y1 = max(box1[1], box2[1])
+    x2 = min(box1[2], box2[2])
+    y2 = min(box1[3], box2[3])
+
+    # Compute the area of intersection
+    intersection = max(0, x2 - x1) * max(0, y2 - y1)
+
+    # Compute the area of both bounding boxes
+    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+
+    # Check for a case where the union area of the boxes is 0
+    # This can happen if both input boxes have zero area.
+    if box1_area + box2_area - intersection == 0:
+        return 0
+
+    # Compute the IoU
+    iou = intersection / float(box1_area + box2_area - intersection)
+    return iou
 
 
 @torch.no_grad()
@@ -59,10 +97,12 @@ def run(
         save_txt=False,  # save results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
+        save_overlaps=False,  # save overlaps to images in --save-dir
         save_trajectories=False,  # save trajectories for each track
         save_vid=False,  # save confidences in --save-txt labels
         nosave=False,  # do not save images/videos
         classes=None,  # filter by class: --class 0, or --class 0 2 3
+        active_tracking_class=None,  # active tracking classes
         agnostic_nms=False,  # class-agnostic NMS
         augment=False,  # augmented inference
         visualize=False,  # visualize features
@@ -97,6 +137,8 @@ def run(
     exp_name = name if name else exp_name + "_" + reid_weights.stem
     save_dir = increment_path(Path(project) / exp_name, exist_ok=exist_ok)  # increment run
     (save_dir / 'tracks' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+
+    print(f'Saving on {save_dir}')
 
     # Load model
     device = select_device(device)
@@ -270,6 +312,50 @@ def run(
                                              file=save_dir / 'crops' / txt_file_name / names[
                                                  c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
+                            human_class = [1]
+
+                            if save_overlaps:
+                                active_tracking_classes = active_tracking_class if active_tracking_class else []
+
+                                if active_tracking_classes:
+                                    all_bbox = [output for output in outputs[i] if
+                                                int(output[5]) in active_tracking_classes]
+                                    other_bbox = [output for output in outputs[i] if
+                                                  int(output[5]) not in active_tracking_classes]
+
+                                    class0_bbox = [output for output in outputs[i] if int(output[5]) == 0]
+                                    class2_bbox = [output for output in outputs[i] if int(output[5]) == 2]
+
+                                    # Create a dictionary where the keys are class numbers and the values are lists of bounding boxes for that class
+                                    bbox_dict = {cls: [output for output in outputs[i] if int(output[5]) == cls] for cls
+                                                 in classes}
+
+                                    # Filter the dictionary to only include the active tracking classes
+                                    active_bbox_dict = {cls: bbox_dict[cls] for cls in active_tracking_class}
+
+                                    print(f"bbox_dict: {bbox_dict}")  # Debug line
+                                    print(f"active_bbox_dict: {active_bbox_dict}")  # Debug line
+
+                                    for bbox1, bbox2 in combinations(all_bbox + other_bbox, 2):
+                                        if bbox1[4] in active_tracking_class and bbox2[4] in human_class:
+
+                                            print(
+                                                f"Entered condition with bbox1: {bbox1} and bbox2: {bbox2}")  # Debug line
+
+                                            iou = compute_iou(bbox1[:4], bbox2[:4])
+
+                                            print(f"Computed IoU: {iou}")  # Debug line
+
+                                            if iou > 0.01:
+                                                logging.info(f"Overlap detected between {bbox1} and {bbox2}")
+                                                if not os.path.exists(f"{save_dir}/overlaps"):
+                                                    os.makedirs(f"{save_dir}/overlaps")
+                                                try:
+                                                    cv2.imwrite(f"{save_dir}/overlaps/{frame_idx}_{iou}_overlap.jpg",
+                                                                im0)
+                                                except Exception as e:
+                                                    logging.error(f"Failed to save image: {e}")
+
             else:
                 pass
                 # tracker_list[i].tracker.pred_n_update_all_tracks()
@@ -336,11 +422,13 @@ def parse_opt():
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
+    parser.add_argument('--save-overlaps', action='store_true', help='save cropped prediction boxes')
     parser.add_argument('--save-trajectories', action='store_true', help='save trajectories for each track')
     parser.add_argument('--save-vid', action='store_true', help='save video tracking results')
     parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
     # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
     parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --classes 0, or --classes 0 2 3')
+    parser.add_argument('--active-tracking-class', nargs='+', type=int, help='active tracking classes')
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--visualize', action='store_true', help='visualize features')
