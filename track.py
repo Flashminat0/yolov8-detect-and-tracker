@@ -81,6 +81,18 @@ def compute_iou(box1, box2):
     return iou
 
 
+def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
+    def intersects(bbox1, bbox2):
+        return not (bbox1[2] < bbox2[0] or bbox1[3] < bbox2[1] or bbox1[0] > bbox2[2] or bbox1[1] > bbox2[3])
+
+    for active_bbox in active_bbox_list:
+        for non_active_bbox in non_active_bbox_list:
+            if intersects(active_bbox, non_active_bbox):
+                return True  # return True as soon as any intersection is found
+
+    return False  # return False if no intersections were found
+
+
 @torch.no_grad()
 def run(
         source='0',
@@ -323,18 +335,16 @@ def run(
                                     other_bbox = [output for output in outputs[i] if
                                                   int(output[5]) not in active_tracking_classes]
 
-                                    class0_bbox = [output for output in outputs[i] if int(output[5]) == 0]
-                                    class2_bbox = [output for output in outputs[i] if int(output[5]) == 2]
-
-                                    # Create a dictionary where the keys are class numbers and the values are lists of bounding boxes for that class
                                     bbox_dict = {cls: [output for output in outputs[i] if int(output[5]) == cls] for cls
                                                  in classes}
 
-                                    # Filter the dictionary to only include the active tracking classes
-                                    active_bbox_dict = {cls: bbox_dict[cls] for cls in active_tracking_class}
+                                    active_bbox_list = [bbox for cls in active_tracking_class for bbox in
+                                                        bbox_dict.get(cls, [])]
 
-                                    print(f"bbox_dict: {bbox_dict}")  # Debug line
-                                    print(f"active_bbox_dict: {active_bbox_dict}")  # Debug line
+                                    non_active_bbox_list = [bbox for cls in set(classes) - set(active_tracking_class)
+                                                            for bbox in bbox_dict.get(cls, [])]
+
+                                    print(check_bbox_intersection(active_bbox_list, non_active_bbox_list))
 
                                     for bbox1, bbox2 in combinations(all_bbox + other_bbox, 2):
                                         if bbox1[4] in active_tracking_class and bbox2[4] in human_class:
