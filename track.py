@@ -85,12 +85,12 @@ def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
     def intersects(bbox1, bbox2):
         return not (bbox1[2] < bbox2[0] or bbox1[3] < bbox2[1] or bbox1[0] > bbox2[2] or bbox1[1] > bbox2[3])
 
+    intersecting_boxes = []
     for active_bbox in active_bbox_list:
         for non_active_bbox in non_active_bbox_list:
-            if intersects(active_bbox, non_active_bbox):
-                return True  # return True as soon as any intersection is found
-
-    return False  # return False if no intersections were found
+            if intersects(active_bbox[:4], non_active_bbox[:4]):  # only use the first 4 elements (bbox coordinates)
+                intersecting_boxes.append((active_bbox[:4], non_active_bbox[:4]))
+    return intersecting_boxes
 
 
 @torch.no_grad()
