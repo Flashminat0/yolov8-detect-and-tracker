@@ -244,6 +244,7 @@ def run(
     curr_frames, prev_frames = [None] * bs, [None] * bs
     for frame_idx, batch in enumerate(dataset):
         path, im, im0s, vid_cap, s = batch
+
         visualize = increment_path(save_dir / Path(path[0]).stem, mkdir=True) if visualize else False
         with dt[0]:
             im = torch.from_numpy(im).to(device)
@@ -385,7 +386,7 @@ def run(
                             intersecting_bbox_list = check_bbox_intersection(active_bbox_list, non_active_bbox_list)
                             o_save_path = save_dir / 'overlaps' / f'{frame_idx}.jpg'
 
-                            crop_and_save(intersecting_bbox_list, im0, o_save_path)
+                            crop_and_save(intersecting_bbox_list, im0s, o_save_path)
 
             else:
                 pass
