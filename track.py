@@ -93,6 +93,50 @@ def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
     return intersecting_boxes
 
 
+def crop_and_save(intersecting_boxes, img, save_path):
+    # Check if img is loaded correctly
+    if img is None:
+        print("Image not loaded correctly.")
+        return
+
+    # Create save_path directory if it does not exist
+    directory = os.path.dirname(save_path)
+    if not os.path.exists(directory):
+        print(f"Creating directory on {directory}")
+        os.makedirs(directory)
+
+    # Check if there are any intersecting boxes
+    if not intersecting_boxes:
+        print("No intersecting boxes.")
+        return
+
+    # Process intersecting boxes
+    for i, boxes in enumerate(intersecting_boxes):
+        for j, box in enumerate(boxes):
+            x1, y1, x2, y2 = map(int, box)
+            # Check if bounding box values are correct
+            if x1 < 0 or y1 < 0 or x2 > img.shape[1] or y2 > img.shape[0]:
+                print(f"Bounding box values out of range for box {box}.")
+                continue
+            cropped_img = img[y1:y2, x1:x2]
+
+            if cropped_img.size == 0:
+                print("Empty image. Not saving.")
+                continue
+
+            save_path_with_index = str(save_path).replace(".jpg", f"_{i}_{j}.jpg")
+
+            # Save cropped image
+            result = cv2.imwrite(str(save_path_with_index), cropped_img)
+            if result:
+                print(f"Image saved successfully")
+            else:
+                print(f"Image not saved")
+
+            # object in active_class_list will end in 0.jpg
+            # object in non_active_class_list will end in 1.jpg
+
+
 @torch.no_grad()
 def run(
         source='0',
@@ -324,47 +368,24 @@ def run(
                                              file=save_dir / 'crops' / txt_file_name / names[
                                                  c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
-                            human_class = [1]
+                    # save overlapped bounding boxes
+                    if save_overlaps:
+                        active_tracking_classes = active_tracking_class if active_tracking_class else []
 
-                            if save_overlaps:
-                                active_tracking_classes = active_tracking_class if active_tracking_class else []
+                        if active_tracking_classes:
+                            bbox_dict = {cls: [output for output in outputs[i] if int(output[5]) == cls] for cls
+                                         in classes}
 
-                                if active_tracking_classes:
-                                    all_bbox = [output for output in outputs[i] if
-                                                int(output[5]) in active_tracking_classes]
-                                    other_bbox = [output for output in outputs[i] if
-                                                  int(output[5]) not in active_tracking_classes]
+                            active_bbox_list = [bbox for cls in active_tracking_class for bbox in
+                                                bbox_dict.get(cls, [])]
 
-                                    bbox_dict = {cls: [output for output in outputs[i] if int(output[5]) == cls] for cls
-                                                 in classes}
+                            non_active_bbox_list = [bbox for cls in set(classes) - set(active_tracking_class)
+                                                    for bbox in bbox_dict.get(cls, [])]
 
-                                    active_bbox_list = [bbox for cls in active_tracking_class for bbox in
-                                                        bbox_dict.get(cls, [])]
+                            intersecting_bbox_list = check_bbox_intersection(active_bbox_list, non_active_bbox_list)
+                            o_save_path = save_dir / 'overlaps' / f'{frame_idx}.jpg'
 
-                                    non_active_bbox_list = [bbox for cls in set(classes) - set(active_tracking_class)
-                                                            for bbox in bbox_dict.get(cls, [])]
-
-                                    print(check_bbox_intersection(active_bbox_list, non_active_bbox_list))
-
-                                    for bbox1, bbox2 in combinations(all_bbox + other_bbox, 2):
-                                        if bbox1[4] in active_tracking_class and bbox2[4] in human_class:
-
-                                            print(
-                                                f"Entered condition with bbox1: {bbox1} and bbox2: {bbox2}")  # Debug line
-
-                                            iou = compute_iou(bbox1[:4], bbox2[:4])
-
-                                            print(f"Computed IoU: {iou}")  # Debug line
-
-                                            if iou > 0.01:
-                                                logging.info(f"Overlap detected between {bbox1} and {bbox2}")
-                                                if not os.path.exists(f"{save_dir}/overlaps"):
-                                                    os.makedirs(f"{save_dir}/overlaps")
-                                                try:
-                                                    cv2.imwrite(f"{save_dir}/overlaps/{frame_idx}_{iou}_overlap.jpg",
-                                                                im0)
-                                                except Exception as e:
-                                                    logging.error(f"Failed to save image: {e}")
+                            crop_and_save(intersecting_bbox_list, im0, o_save_path)
 
             else:
                 pass
