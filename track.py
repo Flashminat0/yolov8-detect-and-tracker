@@ -354,10 +354,6 @@ def run(
 
                             second_elements = [t[1] for t in class_id_list]
 
-                            print('intersecting_bbox_list', intersecting_bbox_list)
-                            print('class_id_list', class_id_list)
-                            print('second_elements', second_elements)
-
                             o_save_path = save_dir / 'overlaps' / f'{frame_idx}.jpg'
 
                             if webcam:
