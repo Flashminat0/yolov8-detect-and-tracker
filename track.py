@@ -44,43 +44,6 @@ from trackers.multi_tracker_zoo import create_tracker
 from itertools import combinations
 
 
-def compute_iou(box1, box2):
-    """Compute the Intersection over Union (IoU) of two bounding boxes.
-
-    Parameters
-    ----------
-    box1 : list, tuple
-        List of coordinates (x1, y1, x2, y2) of box 1.
-    box2 : list, tuple
-        List of coordinates (x1, y1, x2, y2) of box 2.
-
-    Returns
-    -------
-    float
-        IoU of box1 and box2. The IoU is a measure of overlap between two bounding boxes.
-    """
-    x1 = max(box1[0], box2[0])
-    y1 = max(box1[1], box2[1])
-    x2 = min(box1[2], box2[2])
-    y2 = min(box1[3], box2[3])
-
-    # Compute the area of intersection
-    intersection = max(0, x2 - x1) * max(0, y2 - y1)
-
-    # Compute the area of both bounding boxes
-    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
-    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
-
-    # Check for a case where the union area of the boxes is 0
-    # This can happen if both input boxes have zero area.
-    if box1_area + box2_area - intersection == 0:
-        return 0
-
-    # Compute the IoU
-    iou = intersection / float(box1_area + box2_area - intersection)
-    return iou
-
-
 def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
     def intersects(bbox1, bbox2):
         return not (bbox1[2] < bbox2[0] or bbox1[3] < bbox2[1] or bbox1[0] > bbox2[2] or bbox1[1] > bbox2[3])
@@ -386,7 +349,13 @@ def run(
                             intersecting_bbox_list = check_bbox_intersection(active_bbox_list, non_active_bbox_list)
                             o_save_path = save_dir / 'overlaps' / f'{frame_idx}.jpg'
 
-                            crop_and_save(intersecting_bbox_list, im0s, o_save_path)
+                            if webcam:
+                                image = dataset.imgs[0]
+
+                            else:
+                                image = im0s
+
+                            crop_and_save(intersecting_bbox_list, image, o_save_path)
 
             else:
                 pass
