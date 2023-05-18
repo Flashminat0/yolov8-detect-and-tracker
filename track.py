@@ -53,6 +53,10 @@ def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
         for non_active_bbox in non_active_bbox_list:
             if intersects(active_bbox[:4], non_active_bbox[:4]):  # only use the first 4 elements (bbox coordinates)
                 intersecting_boxes.append((active_bbox[:4], non_active_bbox[:4]))
+
+                print(f"Active bbox: {active_bbox}")
+                print(f"Non-active bbox: {non_active_bbox}")
+
     return intersecting_boxes
 
 
