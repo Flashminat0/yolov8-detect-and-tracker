@@ -352,7 +352,11 @@ def run(
                             intersecting_bbox_list, class_id_list = check_bbox_intersection(active_bbox_list,
                                                                                             non_active_bbox_list)
 
-                            class_id_flat_list = [item for tup in class_id_list for item in tup]
+                            second_elements = [t[1] for t in class_id_list]
+
+                            print('intersecting_bbox_list', intersecting_bbox_list)
+                            print('class_id_list', class_id_list)
+                            print('second_elements', second_elements)
 
                             o_save_path = save_dir / 'overlaps' / f'{frame_idx}.jpg'
 
@@ -362,7 +366,7 @@ def run(
                             else:
                                 image = im0s
 
-                            crop_and_save(intersecting_bbox_list, image, o_save_path, class_id_flat_list)
+                            crop_and_save(intersecting_bbox_list, image, o_save_path, second_elements)
 
             else:
                 pass
