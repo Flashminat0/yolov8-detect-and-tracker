@@ -49,18 +49,17 @@ def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
         return not (bbox1[2] < bbox2[0] or bbox1[3] < bbox2[1] or bbox1[0] > bbox2[2] or bbox1[1] > bbox2[3])
 
     intersecting_boxes = []
+    intersecting_boxes_index = []
     for active_bbox in active_bbox_list:
         for non_active_bbox in non_active_bbox_list:
             if intersects(active_bbox[:4], non_active_bbox[:4]):  # only use the first 4 elements (bbox coordinates)
                 intersecting_boxes.append((active_bbox[:4], non_active_bbox[:4]))
+                intersecting_boxes_index.append((active_bbox[4], non_active_bbox[4]))
 
-                print(f"Active bbox: {active_bbox}")
-                print(f"Non-active bbox: {non_active_bbox}")
-
-    return intersecting_boxes
+    return intersecting_boxes, intersecting_boxes_index
 
 
-def crop_and_save(intersecting_boxes, img, save_path):
+def crop_and_save(intersecting_boxes, img, save_path, class_id_list):
     # Check if img is loaded correctly
     if img is None:
         print("Image not loaded correctly.")
@@ -91,12 +90,12 @@ def crop_and_save(intersecting_boxes, img, save_path):
                 print("Empty image. Not saving.")
                 continue
 
-            save_path_with_index = str(save_path).replace(".jpg", f"_{i}_{j}.jpg")
+            save_path_with_index = str(save_path).replace(".jpg", f"_{class_id_list[i]}_{j}.jpg")
 
             # Save cropped image
             result = cv2.imwrite(str(save_path_with_index), cropped_img)
             if result:
-                print(f"Image saved successfully")
+                print(f"Image saved successfully at {save_path_with_index}")
             else:
                 print(f"Image not saved")
 
@@ -350,7 +349,11 @@ def run(
                             non_active_bbox_list = [bbox for cls in set(classes) - set(active_tracking_class)
                                                     for bbox in bbox_dict.get(cls, [])]
 
-                            intersecting_bbox_list = check_bbox_intersection(active_bbox_list, non_active_bbox_list)
+                            intersecting_bbox_list, class_id_list = check_bbox_intersection(active_bbox_list,
+                                                                                            non_active_bbox_list)
+
+                            class_id_flat_list = [item for tup in class_id_list for item in tup]
+
                             o_save_path = save_dir / 'overlaps' / f'{frame_idx}.jpg'
 
                             if webcam:
@@ -359,7 +362,7 @@ def run(
                             else:
                                 image = im0s
 
-                            crop_and_save(intersecting_bbox_list, image, o_save_path)
+                            crop_and_save(intersecting_bbox_list, image, o_save_path, class_id_flat_list)
 
             else:
                 pass
