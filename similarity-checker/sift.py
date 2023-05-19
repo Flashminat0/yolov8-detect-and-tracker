@@ -5,12 +5,16 @@ import numpy as np
 img1 = cv2.imread('./cam2.jpeg', 1)
 img2 = cv2.imread('./cctv2.jpeg', 1)
 
+
+grey_img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+grey_img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
 # Initialize SIFT detector
 sift = cv2.SIFT_create()
 
 # Detect keypoints and compute descriptors
-kp1, des1 = sift.detectAndCompute(img1, None)
-kp2, des2 = sift.detectAndCompute(img2, None)
+kp1, des1 = sift.detectAndCompute(grey_img1, None)
+kp2, des2 = sift.detectAndCompute(grey_img2, None)
 
 # Initialize FLANN matcher
 FLANN_INDEX_KDTREE = 1
