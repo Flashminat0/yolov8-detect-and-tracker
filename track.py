@@ -44,9 +44,12 @@ from trackers.multi_tracker_zoo import create_tracker
 from itertools import combinations
 
 
-def check_bbox_intersection(active_bbox_list, non_active_bbox_list):
+def check_bbox_intersection(active_bbox_list, non_active_bbox_list, dist_thres):
     def intersects(bbox1, bbox2):
-        return not (bbox1[2] < bbox2[0] or bbox1[3] < bbox2[1] or bbox1[0] > bbox2[2] or bbox1[1] > bbox2[3])
+        return not (bbox1[2] + dist_thres < bbox2[0] - dist_thres or
+                    bbox1[3] + dist_thres < bbox2[1] - dist_thres or
+                    bbox1[0] - dist_thres > bbox2[2] + dist_thres or
+                    bbox1[1] - dist_thres > bbox2[3] + dist_thres)
 
     intersecting_boxes = []
     intersecting_boxes_index = []
@@ -84,7 +87,12 @@ def crop_and_save(intersecting_boxes, img, save_path, class_id_list):
             if x1 < 0 or y1 < 0 or x2 > img.shape[1] or y2 > img.shape[0]:
                 print(f"Bounding box values out of range for box {box}.")
                 continue
-            cropped_img = img[y1:y2, x1:x2]
+            offset = 10
+
+            # cropped_img = img[y1:y2, x1:x2]
+            # cropped_img = img[y1 - offset:y2 + offset, x1 - offset:x2 + offset]
+            cropped_img = img[max(0, y1 - offset):min(img.shape[0], y2 + offset),
+                          max(0, x1 - offset):min(img.shape[1], x2 + offset)]
 
             if cropped_img.size == 0:
                 print("Empty image. Not saving.")
@@ -113,6 +121,7 @@ def run(
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
+        dist_thres=0.0,  # distance threshold from active bbox to non-active bbox
         max_det=1000,  # maximum detections per image
         device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         show_vid=False,  # show results
@@ -350,7 +359,8 @@ def run(
                                                     for bbox in bbox_dict.get(cls, [])]
 
                             intersecting_bbox_list, class_id_list = check_bbox_intersection(active_bbox_list,
-                                                                                            non_active_bbox_list)
+                                                                                            non_active_bbox_list,
+                                                                                            dist_thres)
 
                             second_elements = [t[1] for t in class_id_list]
 
@@ -424,6 +434,8 @@ def parse_opt():
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='NMS IoU threshold')
+    parser.add_argument('--dist-thres', type=float, default=0,
+                        help='distance from active to non-active class')
     parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per image')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--show-vid', action='store_true', help='display tracking video results')
