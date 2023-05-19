@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../similarity-checker/.idea/similarity-checker.iml" filepath="$PROJECT_DIR$/../similarity-checker/.idea/similarity-checker.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/tracker.iml" filepath="$PROJECT_DIR$/.idea/tracker.iml" />
     </modules>
   </component>

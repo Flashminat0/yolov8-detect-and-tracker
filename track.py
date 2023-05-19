@@ -87,12 +87,12 @@ def crop_and_save(intersecting_boxes, img, save_path, class_id_list):
             if x1 < 0 or y1 < 0 or x2 > img.shape[1] or y2 > img.shape[0]:
                 print(f"Bounding box values out of range for box {box}.")
                 continue
-            offset = 10
 
-            # cropped_img = img[y1:y2, x1:x2]
-            # cropped_img = img[y1 - offset:y2 + offset, x1 - offset:x2 + offset]
-            cropped_img = img[max(0, y1 - offset):min(img.shape[0], y2 + offset),
-                          max(0, x1 - offset):min(img.shape[1], x2 + offset)]
+            # to give some padding to the cropped image so that the object is not cropped too tightly
+            padding = 10
+
+            cropped_img = img[max(0, y1 - padding):min(img.shape[0], y2 + padding),
+                          max(0, x1 - padding):min(img.shape[1], x2 + padding)]
 
             if cropped_img.size == 0:
                 print("Empty image. Not saving.")
