@@ -5,7 +5,6 @@ import numpy as np
 img1 = cv2.imread('./cam2.jpeg', 1)
 img2 = cv2.imread('./cctv2.jpeg', 1)
 
-
 grey_img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 grey_img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
@@ -41,7 +40,7 @@ matchesMask = mask.ravel().tolist()
 similarity = (len([1 for mask in matchesMask if mask]) / len(matchesMask)) * 100
 
 # Draw only inlier matches with different random colors
-draw_params = dict(matchColor = None,  # this makes color random
+draw_params = dict(matchColor=None,  # this makes color random
                    singlePointColor=None,
                    matchesMask=matchesMask,
                    flags=2)
