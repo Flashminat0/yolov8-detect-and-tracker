@@ -8,6 +8,5 @@
     </content>
     <orderEntry type="jdk" jdkName="research" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="similarity-checker" />
   </component>
 </module>
