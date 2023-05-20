@@ -42,6 +42,7 @@ from yolov8.ultralytics.yolo.utils.ops import Profile, non_max_suppression, scal
 from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
 from trackers.multi_tracker_zoo import create_tracker
 from itertools import combinations
+from similarity_checker import sift
 
 
 def check_bbox_intersection(active_bbox_list, non_active_bbox_list, dist_thres):
@@ -148,7 +149,7 @@ def run(
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
-        retina_masks=False,
+        retina_masks=False,  # use retinaface for face detection
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
