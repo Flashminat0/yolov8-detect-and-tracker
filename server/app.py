@@ -132,8 +132,8 @@ class DownloadImage(Resource):
     def get(self, image_name):
         try:
             storage = StorageService()
-            response = storage.download_file(image_name)
-            return send_file(response, as_attachment=True)
+            url = storage.get_file_url(image_name)
+            return jsonify({'url': url})
         except Exception as ex:
             return str(ex), 400
 
@@ -152,6 +152,47 @@ class DeleteImage(Resource):
 
 
 api.add_resource(DeleteImage, '/deleteImage/<string:image_name>')
+
+
+class CompareImages(Resource):
+    def post(self):
+        try:
+            if 'image_from_phone' not in request.files:
+                return 'No image_from_phone in request', 400
+
+            image_from_app_name = request.files['image_from_phone']
+
+            user = request.form.get('user')
+            image_2_frame = request.form.get('frame')
+            image_2_class_idx = request.form.get('class_idx')
+
+            if not all([user, image_2_frame, image_2_class_idx]):
+                return 'Missing data in request', 400
+
+            file_extension = image_from_app_name.filename.split('.')[-1]
+
+            image_name = secure_filename(
+                user + '_' + image_2_class_idx + '.' + file_extension)
+            image_path = os.path.join('tmp', image_name)
+
+            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+
+            image_from_app_name.save(image_path)
+
+            # save image from app to storage
+            storage = StorageService()
+            response = storage.upload_file(image_path, image_name)  # Corrected this line
+
+            # After upload, delete the temporary local file
+            os.remove(image_path)
+
+            return jsonify(response)
+
+        except Exception as ex:
+            return str(ex), 400
+
+
+api.add_resource(CompareImages, '/compareImages')
 
 if __name__ == "__main__":
     todo = ToDoCollection()
