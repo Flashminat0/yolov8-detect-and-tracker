@@ -10,7 +10,10 @@ API_KEY_PATH = "firebase-api-key.json"  # Add your API file path
 
 # Initialize the default firebase app
 certificate = credentials.Certificate(API_KEY_PATH)
-firebaseApp = initialize_app(certificate, {'databaseURL': appsettings['DatabaseURL']})
+firebaseApp = initialize_app(certificate, {
+    'databaseURL': appsettings['DatabaseURL'],
+    'storageBucket': appsettings['StorageURL'],
+})
 
 
 class ToDoCollection:
