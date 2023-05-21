@@ -62,7 +62,7 @@ def check_bbox_intersection(active_bbox_list, non_active_bbox_list, dist_thres):
     return intersecting_boxes, intersecting_boxes_index
 
 
-def crop_and_save(intersecting_boxes, img, save_path, class_id_list):
+def crop_and_save(intersecting_boxes, img, save_path, class_id_list, save_only=None):
     # Check if img is loaded correctly
     if img is None:
         print("Image not loaded correctly.")
@@ -100,12 +100,34 @@ def crop_and_save(intersecting_boxes, img, save_path, class_id_list):
 
             save_path_with_index = str(save_path).replace(".jpg", f"_{class_id_list[i]}_{j}.jpg")
 
-            # Save cropped image
-            result = cv2.imwrite(str(save_path_with_index), cropped_img)
-            if result:
-                print(f"Image saved successfully at {save_path_with_index}")
+            if save_only is not None:
+                if save_only == 'active' :
+                    # save only active class imgs
+                    if j == 0:  # objects
+                        # Save cropped image
+                        result = cv2.imwrite(str(save_path_with_index), cropped_img)
+                        if result:
+                            print(f"Image saved successfully at {save_path_with_index}")
+                        else:
+                            print(f"Image not saved")
+                    pass
+                if save_only == 'non_active':  # humans
+                    # save only non-active class imgs
+                    if j == 1:
+                        # Save cropped image
+                        result = cv2.imwrite(str(save_path_with_index), cropped_img)
+                        if result:
+                            print(f"Image saved successfully at {save_path_with_index}")
+                        else:
+                            print(f"Image not saved")
             else:
-                print(f"Image not saved")
+                # save all imgs
+                # Save cropped image
+                result = cv2.imwrite(str(save_path_with_index), cropped_img)
+                if result:
+                    print(f"Image saved successfully at {save_path_with_index}")
+                else:
+                    print(f"Image not saved")
 
             # object in active_class_list will end in 0.jpg
             # object in non_active_class_list will end in 1.jpg
@@ -128,7 +150,8 @@ def run(
         save_txt=False,  # save results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
-        save_overlaps=False,  # save overlaps to images in --save-dir
+        save_overlaps=False,  # save overlaps to images in -
+        save_only=None,  # save active class or non-active class
         save_trajectories=False,  # save trajectories for each track
         save_vid=False,  # save confidences in --save-txt labels
         nosave=False,  # do not save images/videos
@@ -354,8 +377,6 @@ def run(
                             # we do not need more frames and we can stop
                             return
 
-
-
                         active_tracking_classes = active_tracking_class if active_tracking_class else []
 
                         if active_tracking_classes:
@@ -382,7 +403,7 @@ def run(
                             else:
                                 image = im0s
 
-                            crop_and_save(intersecting_bbox_list, image, o_save_path, second_elements)
+                            crop_and_save(intersecting_bbox_list, image, o_save_path, second_elements, save_only)
 
             else:
                 pass
@@ -453,6 +474,7 @@ def parse_opt():
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
     parser.add_argument('--save-overlaps', action='store_true', help='save cropped prediction boxes')
+    parser.add_argument('--save-only', type=str, help='save active class or non-active class')
     parser.add_argument('--save-trajectories', action='store_true', help='save trajectories for each track')
     parser.add_argument('--save-vid', action='store_true', help='save video tracking results')
     parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
