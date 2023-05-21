@@ -149,6 +149,7 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
         retina_masks=False,  # use retinaface for face detection
+        stop_in_frame=-1,  # stop tracking in this frame
 ):
     print(tracking_config)
 
@@ -349,6 +350,12 @@ def run(
 
                     # save overlapped bounding boxes
                     if save_overlaps:
+                        if 0 < stop_in_frame == frame_idx:
+                            # we do not need more frames and we can stop
+                            return
+
+
+
                         active_tracking_classes = active_tracking_class if active_tracking_class else []
 
                         if active_tracking_classes:
@@ -467,6 +474,7 @@ def parse_opt():
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
     parser.add_argument('--vid-stride', type=int, default=1, help='video frame-rate stride')
     parser.add_argument('--retina-masks', action='store_true', help='whether to plot masks in native resolution')
+    parser.add_argument('--stop-in-frame', type=int, default=-1, help='stop in frame')
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     opt.tracking_config = ROOT / 'trackers' / opt.tracking_method / 'configs' / (opt.tracking_method + '.yaml')

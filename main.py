@@ -3,9 +3,9 @@ from pathlib import Path
 
 # Define the arguments for the run function
 args = {
-    'source': 'test2.mp4',  # Use a video file named 'test.avi'
+    'source': 'test.avi',  # Use a video file named 'test.avi'
     'yolo_weights': Path('yolov8x.pt'),
-    'tracking_method': 'strongsort',
+    'tracking_method': 'bytetrack',
     'save_vid': True,
     'save_overlaps': True,
     'active_tracking_class': [2, 3],
@@ -13,6 +13,7 @@ args = {
     'dist_thres': 22.0,
     'line_thickness': 1,
     'imgsz': [640, 640],
+    'stop_in_frame': 200
 }
 
 # Set the tracking_config based on the tracking_method

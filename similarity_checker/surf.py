@@ -1,24 +1,27 @@
+# DOES NOT WORK BECAUSE SURF IS PATENTED AND REMOVED FROM OPENCV
+# https://stackoverflow.com/questions/52305578/sift-cv2-xfeatures2d-sift-create-not-working-even-though-have-contrib-instal
+
 import cv2
 import numpy as np
 
 # Load images
-img1 = cv2.imread('cam1.jpeg', 1)
-img2 = cv2.imread('cctv1.jpeg', 1)
+img1 = cv2.imread('cam3.jpeg', 1)
+img2 = cv2.imread('cctv3.jpg', 1)
 
 grey_img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 grey_img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
-# Initialize SIFT detector
-sift = cv2.SIFT_create()
+# Initialize SURF detector
+surf = cv2.xfeatures2d.SURF_create()
 
 # Detect keypoints and compute descriptors
-kp1, des1 = sift.detectAndCompute(grey_img1, None)
-kp2, des2 = sift.detectAndCompute(grey_img2, None)
+kp1, des1 = surf.detectAndCompute(grey_img1, None)
+kp2, des2 = surf.detectAndCompute(grey_img2, None)
 
 # Initialize FLANN matcher
-FLANN_INDEX_KDTREE = 4
-index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=15)
-search_params = dict(checks=150)
+FLANN_INDEX_KDTREE = 1
+index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+search_params = dict(checks=50)
 flann = cv2.FlannBasedMatcher(index_params, search_params)
 
 # Match descriptors using FLANN matcher
