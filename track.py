@@ -62,7 +62,7 @@ def check_bbox_intersection(active_bbox_list, non_active_bbox_list, dist_thres):
     return intersecting_boxes, intersecting_boxes_index
 
 
-def crop_and_save(intersecting_boxes, img, save_path, class_id_list, save_only=None):
+def crop_and_save(intersecting_boxes, img, save_path, class_id_list, save_only=None, prod=False):
     # Check if img is loaded correctly
     if img is None:
         print("Image not loaded correctly.")
@@ -73,6 +73,11 @@ def crop_and_save(intersecting_boxes, img, save_path, class_id_list, save_only=N
     if not os.path.exists(directory):
         print(f"Creating directory on {directory}")
         os.makedirs(directory)
+
+    # Create output directory if prod
+    if prod:
+        if not os.path.exists('output/' + str(save_path).split('\\')[2]):
+            os.makedirs('output/' + str(save_path).split('\\')[2])
 
     # Check if there are any intersecting boxes
     if not intersecting_boxes:
@@ -100,8 +105,12 @@ def crop_and_save(intersecting_boxes, img, save_path, class_id_list, save_only=N
 
             save_path_with_index = str(save_path).replace(".jpg", f"_{class_id_list[i]}_{j}.jpg")
 
+            if prod:
+                save_path_with_index = ('output/' + str(save_path).split('\\')[2]) + '\\' + \
+                                       save_path_with_index.split("\\")[-1]
+
             if save_only is not None:
-                if save_only == 'active' :
+                if save_only == 'active':  # objects
                     # save only active class imgs
                     if j == 0:  # objects
                         # Save cropped image
@@ -173,9 +182,8 @@ def run(
         vid_stride=1,  # video frame-rate stride
         retina_masks=False,  # use retinaface for face detection
         stop_in_frame=-1,  # stop tracking in this frame
+        prod=False,  # production mode
 ):
-    print(tracking_config)
-
     # Initialize
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -195,8 +203,6 @@ def run(
     exp_name = name if name else exp_name + "_" + reid_weights.stem
     save_dir = increment_path(Path(project) / exp_name, exist_ok=exist_ok)  # increment run
     (save_dir / 'tracks' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
-
-    print(f'Saving on {save_dir}')
 
     # Load model
     device = select_device(device)
@@ -244,7 +250,19 @@ def run(
     # model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile(), Profile())
     curr_frames, prev_frames = [None] * bs, [None] * bs
+
+    if prod:
+        if not os.path.exists('output/' + str(save_dir).split('\\')[2]):
+            os.makedirs('output/' + str(save_dir).split('\\')[2])
+        save_dir = Path('output/' + str(save_dir).split('\\')[2])
+
+        print('Saving to ' + str(save_dir) + '...')
+
     for frame_idx, batch in enumerate(dataset):
+        if 0 < stop_in_frame == frame_idx:
+            # we do not need more frames and we can stop
+            return str(save_dir)
+
         path, im, im0s, vid_cap, s = batch
 
         visualize = increment_path(save_dir / Path(path[0]).stem, mkdir=True) if visualize else False
@@ -270,6 +288,7 @@ def run(
 
         # Process detections
         for i, det in enumerate(p):  # detections per image
+
             seen += 1
             if webcam:  # bs >= 1
                 p, im0, _ = path[i], im0s[i].copy(), dataset.count
@@ -367,15 +386,16 @@ def run(
                                 tracker_list[i].trajectory(im0, q, color=color)
                             if save_crop:
                                 txt_file_name = txt_file_name if (isinstance(path, list) and len(path) > 1) else ''
-                                save_one_box(np.array(bbox, dtype=np.int16), imc,
-                                             file=save_dir / 'crops' / txt_file_name / names[
-                                                 c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
+
+                                # only save active tracking classes
+                                if active_tracking_class:
+                                    if int(cls) in active_tracking_class:
+                                        save_one_box(np.array(bbox, dtype=np.int16), imc,
+                                                     file=save_dir / 'crops' / txt_file_name / names[
+                                                         c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
                     # save overlapped bounding boxes
                     if save_overlaps:
-                        if 0 < stop_in_frame == frame_idx:
-                            # we do not need more frames and we can stop
-                            return
 
                         active_tracking_classes = active_tracking_class if active_tracking_class else []
 
@@ -403,7 +423,7 @@ def run(
                             else:
                                 image = im0s
 
-                            crop_and_save(intersecting_bbox_list, image, o_save_path, second_elements, save_only)
+                            crop_and_save(intersecting_bbox_list, image, o_save_path, second_elements, save_only, prod)
 
             else:
                 pass
@@ -497,6 +517,7 @@ def parse_opt():
     parser.add_argument('--vid-stride', type=int, default=1, help='video frame-rate stride')
     parser.add_argument('--retina-masks', action='store_true', help='whether to plot masks in native resolution')
     parser.add_argument('--stop-in-frame', type=int, default=-1, help='stop in frame')
+    parser.add_argument('--prod', action='store_true', help='this is to change the file path save')
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     opt.tracking_config = ROOT / 'trackers' / opt.tracking_method / 'configs' / (opt.tracking_method + '.yaml')

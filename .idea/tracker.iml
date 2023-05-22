@@ -5,6 +5,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea/ZeppelinRemoteNotebooks" />
       <excludeFolder url="file://$MODULE_DIR$/runs" />
       <excludeFolder url="file://$MODULE_DIR$/yolov8/ultralytics/yolo/data/datasets" />
+      <excludeFolder url="file://$MODULE_DIR$/assets/compressed" />
+      <excludeFolder url="file://$MODULE_DIR$/assets/rec" />
+      <excludeFolder url="file://$MODULE_DIR$/output" />
+      <excludeFolder url="file://$MODULE_DIR$/weights" />
     </content>
     <orderEntry type="jdk" jdkName="research" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -25,3 +25,7 @@ val_utils/
 # interactive plots
 *.html
 
+/assets/rec/
+/assets/compressed/
+
+output/

@@ -1,3 +1,5 @@
+import os
+import random
 import cv2
 import numpy as np
 
@@ -69,3 +71,27 @@ def compare_images(img1_path, img2_path, show_img, return_img3=False, ):
         return similarity, img3
     else:
         return similarity
+
+
+def compare_laptop_images(ref_img_path, laptop_dir, num_images=5):
+    # Get all laptop folders
+    laptop_folders = [f for f in os.listdir(laptop_dir) if os.path.isdir(os.path.join(laptop_dir, f))]
+
+    for folder in laptop_folders:
+        folder_path = os.path.join(laptop_dir, folder)
+        # Get all images in the folder
+        images = [img for img in os.listdir(folder_path) if img.endswith('.jpg')]
+        # Randomly select num_images images
+        selected_images = random.sample(images, min(num_images, len(images)))
+
+        similarities = []
+        for img in selected_images:
+            img_path = os.path.join(folder_path, img)
+            similarity = compare_images(ref_img_path, img_path, show_img=False)
+            similarities.append(similarity)
+
+        print(f"For laptop {folder}, max similarity: {max(similarities)}, min similarity: {min(similarities)}")
+
+
+# Call the function
+compare_laptop_images('a.jpg', 'output/exp246/crops/laptop')
