@@ -1,7 +1,9 @@
-import os
-import random
 import cv2
 import numpy as np
+import os
+import random
+import requests
+import io
 
 
 def compare_images(img1_path, img2_path, show_img, return_img3=False, ):
@@ -73,7 +75,27 @@ def compare_images(img1_path, img2_path, show_img, return_img3=False, ):
         return similarity
 
 
-def compare_laptop_images(ref_img_path, laptop_dir, num_images=5):
+# Your existing function here...
+# compare_images function...
+
+def download_and_save_image_from_url(url, save_dir, filename):
+    response = requests.get(url)
+    image_bytes = io.BytesIO(response.content)
+    image = cv2.imdecode(np.frombuffer(image_bytes.read(), np.uint8), 1)
+    # Create the save directory if it doesn't exist
+    os.makedirs(save_dir, exist_ok=True)
+    # Save the image
+    save_path = os.path.join(save_dir, filename)
+    cv2.imwrite(save_path, image)
+    return save_path
+
+
+def compare_laptop_images(ref_img_url, laptop_dir, job_number, num_images=5):
+    # Download and save the reference image
+    ref_img_path = download_and_save_image_from_url(ref_img_url, f'output/exp{job_number}/jobs', 'ref_img.jpg')
+    # Load the reference image
+    ref_img = cv2.imread(ref_img_path, 1)
+
     # Get all laptop folders
     laptop_folders = [f for f in os.listdir(laptop_dir) if os.path.isdir(os.path.join(laptop_dir, f))]
 
@@ -87,6 +109,7 @@ def compare_laptop_images(ref_img_path, laptop_dir, num_images=5):
         similarities = []
         for img in selected_images:
             img_path = os.path.join(folder_path, img)
+            # Compare the images
             similarity = compare_images(ref_img_path, img_path, show_img=False)
             similarities.append(similarity)
 
@@ -94,4 +117,6 @@ def compare_laptop_images(ref_img_path, laptop_dir, num_images=5):
 
 
 # Call the function
-compare_laptop_images('a.jpg', 'output/exp246/crops/laptop')
+compare_laptop_images(
+    'https://firebasestorage.googleapis.com/v0/b/research-cctv.appspot.com/o/a.jpg?alt=media&token=a3fa5129-405d-48f5-a6d9-8b85ff68e4ae',
+    'output/exp246/crops/laptop', 246)
