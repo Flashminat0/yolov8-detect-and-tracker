@@ -13,7 +13,7 @@ def run_tracking():
         'classes': [63, 67],
         'line_thickness': 1,
         'imgsz': [640, 640],
-        'stop_in_frame': 200,
+        'stop_in_frame': 30,
         'prod': True,
     }
 
@@ -29,7 +29,6 @@ def run_tracking():
 
     return folder, str(folder).split('\\')[1].replace('exp', '')
     # output\exp249
-
 
 # Call the function
 # run_tracking()

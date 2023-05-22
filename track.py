@@ -259,14 +259,24 @@ def run(
         print('Saving to ' + str(save_dir) + '...')
 
     for frame_idx, batch in enumerate(dataset):
+
+        path, im, im0s, vid_cap, s = batch
+
         if 0 < stop_in_frame == frame_idx:
             # we do not need more frames and we can stop
+            # save the last frame
+            if save_img:
+                if webcam:
+                    image = dataset.imgs[0]
+
+                else:
+                    image = im0s
+                cv2.imwrite(str(save_dir / Path(path[0]).stem) + '.jpg', image)
+
             # remove all cv2 windows without a key press
             cv2.destroyAllWindows()
 
             return str(save_dir)
-
-        path, im, im0s, vid_cap, s = batch
 
         visualize = increment_path(save_dir / Path(path[0]).stem, mkdir=True) if visualize else False
         with dt[0]:
