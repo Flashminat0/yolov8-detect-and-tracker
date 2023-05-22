@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 
 # Load images
-img1 = cv2.imread('cam1.jpeg', 1)
-img2 = cv2.imread('cctv1.jpeg', 1)
+img1 = cv2.imread('img.png', 1)
+img2 = cv2.imread('img_1.png', 1)
 
 grey_img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 grey_img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)

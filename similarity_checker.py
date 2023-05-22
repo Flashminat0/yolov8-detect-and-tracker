@@ -45,24 +45,25 @@ def compare_images(img1_path, img2_path, show_img, return_img3=False, ):
     # Calculate the similarity as a percentage
     similarity = (len([1 for mask in matchesMask if mask]) / len(matchesMask)) * 100
 
-    # Draw only inlier matches with different random colors
-    draw_params = dict(matchColor=None,  # this makes color random
-                       singlePointColor=None,
-                       matchesMask=matchesMask,
-                       flags=2)
-    img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
-
-    # Add similarity text to the image
-    cv2.putText(img3, 'Similarity: {:.2f}%'.format(similarity), (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-
-    # Resize the final image to a specific width, keeping aspect ratio constant
-    desired_width = 1200
-    aspect_ratio = img3.shape[1] / img3.shape[0]  # width/height
-    desired_height = int(desired_width / aspect_ratio)  # calculate the new height based on aspect ratio
-    img3 = cv2.resize(img3, (desired_width, desired_height))
-
     if show_img:
+        # Draw only inlier matches with different random colors
+        draw_params = dict(matchColor=None,  # this makes color random
+                           singlePointColor=None,
+                           matchesMask=matchesMask,
+                           flags=2)
+
+        img3 = cv2.drawMatches(img1, kp1, img2, kp2, good, None, **draw_params)
+
+        # Add similarity text to the image
+        cv2.putText(img3, 'Similarity: {:.2f}%'.format(similarity), (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+        # Resize the final image to a specific width, keeping aspect ratio constant
+        desired_width = 1200
+        aspect_ratio = img3.shape[1] / img3.shape[0]  # width/height
+        desired_height = int(desired_width / aspect_ratio)  # calculate the new height based on aspect ratio
+        img3 = cv2.resize(img3, (desired_width, desired_height))
+
         # Show the final image
         cv2.imshow('Matches', img3)
         cv2.waitKey(0)
@@ -74,9 +75,6 @@ def compare_images(img1_path, img2_path, show_img, return_img3=False, ):
     else:
         return similarity
 
-
-# Your existing function here...
-# compare_images function...
 
 def download_and_save_image_from_url(url, save_dir, filename):
     response = requests.get(url)
@@ -99,6 +97,7 @@ def compare_laptop_images(ref_img_url, laptop_dir, job_number, num_images=20):
     # Get all laptop folders
     laptop_folders = [f for f in os.listdir(laptop_dir) if os.path.isdir(os.path.join(laptop_dir, f))]
 
+    data = {}
     for folder in laptop_folders:
         folder_path = os.path.join(laptop_dir, folder)
         # Get all images in the folder
@@ -106,22 +105,44 @@ def compare_laptop_images(ref_img_url, laptop_dir, job_number, num_images=20):
         # Randomly select num_images images
         selected_images = random.sample(images, min(num_images, len(images)))
 
-        similarities = []
+        max_similarity = 0
+        max_similarity_img_path = ""
+        min_similarity = 100
         for img in selected_images:
             img_path = os.path.join(folder_path, img)
             # Compare the images
             similarity = compare_images(ref_img_path, img_path, show_img=False)
-            similarities.append(similarity)
+            if similarity > max_similarity:
+                max_similarity = similarity
+                max_similarity_img_path = os.path.normpath(img_path)
+            if similarity < min_similarity:
+                min_similarity = similarity
 
-        # print(f"For laptop {folder}, max similarity: {max(similarities)}, min similarity: {min(similarities)}")
+        # Store the max similarity and corresponding image path
+        data[folder] = {'max': max_similarity, 'max_img_path': max_similarity_img_path, 'min': min_similarity}
 
-        # return folder name and max similarity value
-        return folder, max(similarities), min(similarities)
+    return data
 
+
+def compare_with_max_images(image_url, data, job_number):
+    # Download and save the image from the URL
+    img_path = download_and_save_image_from_url(image_url, f'output/exp{job_number}/jobs', 'compare_img.jpg')
+
+    similarities = {}
+    print(img_path)
+    print(data.items())
+
+    for folder, values in data.items():
+        max_img_path = values['max_img_path']
+        # Compare the images
+        similarity = compare_images(img_path, max_img_path, show_img=False)
+        similarities[folder] = similarity
+
+    return similarities
 
 # Call the function
-folder, max_similarity, min_similarity = compare_laptop_images(
-    'https://firebasestorage.googleapis.com/v0/b/research-cctv.appspot.com/o/a.jpg?alt=media&token=a3fa5129-405d-48f5-a6d9-8b85ff68e4ae',
-    'output/exp246/crops/laptop', 246)
-
-print(f"Folder: {folder}, Max similarity: {max_similarity} Min similarity: {min_similarity}")
+# folder, max_similarity, min_similarity = compare_laptop_images(
+#     'https://firebasestorage.googleapis.com/v0/b/research-cctv.appspot.com/o/a.jpg?alt=media&token=a3fa5129-405d-48f5-a6d9-8b85ff68e4ae',
+#     'output/exp246/crops/laptop', 246)
+#
+# print(f"Folder: {folder}, Max similarity: {max_similarity} Min similarity: {min_similarity}")
