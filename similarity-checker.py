@@ -90,7 +90,7 @@ def download_and_save_image_from_url(url, save_dir, filename):
     return save_path
 
 
-def compare_laptop_images(ref_img_url, laptop_dir, job_number, num_images=5):
+def compare_laptop_images(ref_img_url, laptop_dir, job_number, num_images=20):
     # Download and save the reference image
     ref_img_path = download_and_save_image_from_url(ref_img_url, f'output/exp{job_number}/jobs', 'ref_img.jpg')
     # Load the reference image
@@ -113,10 +113,15 @@ def compare_laptop_images(ref_img_url, laptop_dir, job_number, num_images=5):
             similarity = compare_images(ref_img_path, img_path, show_img=False)
             similarities.append(similarity)
 
-        print(f"For laptop {folder}, max similarity: {max(similarities)}, min similarity: {min(similarities)}")
+        # print(f"For laptop {folder}, max similarity: {max(similarities)}, min similarity: {min(similarities)}")
+
+        # return folder name and max similarity value
+        return folder, max(similarities), min(similarities)
 
 
 # Call the function
-compare_laptop_images(
+folder, max_similarity, min_similarity = compare_laptop_images(
     'https://firebasestorage.googleapis.com/v0/b/research-cctv.appspot.com/o/a.jpg?alt=media&token=a3fa5129-405d-48f5-a6d9-8b85ff68e4ae',
     'output/exp246/crops/laptop', 246)
+
+print(f"Folder: {folder}, Max similarity: {max_similarity} Min similarity: {min_similarity}")
