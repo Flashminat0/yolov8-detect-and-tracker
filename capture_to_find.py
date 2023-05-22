@@ -23,6 +23,8 @@ def capture_to_find(image_url):
     laptop_list = []
     storage = StorageService()
 
+    print('uploading images ...\n')
+
     for laptop, values in data.items():
         max_img_path = values['max_img_path']
         img = cv.imread(max_img_path)
