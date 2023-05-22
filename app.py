@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_restful import Api, Resource
 from werkzeug.utils import secure_filename
 
+from capture_to_find import capture_to_find
 from firebase_service import ToDoCollection
 from storage_service import StorageService
 
@@ -193,6 +194,23 @@ class CompareImages(Resource):
 
 
 api.add_resource(CompareImages, '/compareImages')
+
+
+class FindTheLaptop(Resource):
+    def post(self):
+        try:
+            json_data = request.get_json(force=True)
+            image_url = json_data['image_url']
+
+            data = capture_to_find(image_url)
+
+            return jsonify(data)
+
+        except Exception as ex:
+            return str(ex), 400
+
+
+api.add_resource(FindTheLaptop, '/findTheLaptop')
 
 if __name__ == "__main__":
     todo = ToDoCollection()

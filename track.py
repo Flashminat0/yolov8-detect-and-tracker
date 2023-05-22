@@ -261,8 +261,7 @@ def run(
     for frame_idx, batch in enumerate(dataset):
         if 0 < stop_in_frame == frame_idx:
             # we do not need more frames and we can stop
-            # remove all cv2 windows
-            cv2.waitKey(0)
+            # remove all cv2 windows without a key press
             cv2.destroyAllWindows()
 
             return str(save_dir)
