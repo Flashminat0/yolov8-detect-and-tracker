@@ -5,7 +5,7 @@ from pathlib import Path
 def run_tracking():
     # Define the arguments for the run function
     args = {
-        'source': 0,
+        'source': 1,
         'yolo_weights': Path('yolov8x.pt'),
         'tracking_method': 'bytetrack',
         'save_crop': True,
@@ -13,7 +13,7 @@ def run_tracking():
         'classes': [63],
         'line_thickness': 1,
         'imgsz': [640, 640],
-        'stop_in_frame': 30,
+        'stop_in_frame': 100,
         'prod': True,
     }
 
@@ -27,7 +27,7 @@ def run_tracking():
     # Call the run function
     folder = run(**args)
 
-    return folder, str(folder).split('\\')[1].replace('exp', '')
+    return folder, str(folder).split('\\')[1].replace('exp', ''), args['source']
     # output\exp249
 
 # Call the function

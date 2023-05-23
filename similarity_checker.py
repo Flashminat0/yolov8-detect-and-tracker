@@ -36,6 +36,13 @@ def compare_images(img1_path, img2_path, show_img, return_img3=False, ):
         if m.distance < 0.75 * n.distance:
             good.append(m)
 
+    if len(good) < 4:
+        if return_img3:
+            zero_image = np.zeros_like(img1)
+            return 0, zero_image
+        else:
+            return 0
+
     # Apply RANSAC to remove outlier matches
     src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
     dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)

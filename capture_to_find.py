@@ -8,7 +8,7 @@ from storage_service import StorageService
 
 
 def capture_to_find(image_url, user, id_job):
-    folder, exp = run_tracking()
+    folder, exp, source = run_tracking()
 
     print('tracking done ...\n')
 
@@ -39,10 +39,9 @@ def capture_to_find(image_url, user, id_job):
         laptop_list.append(values)
 
     # Upload the frame image
-    frame_img_path = f"output\\exp{exp}\\0.jpg"
-    frame_img_name = os.path.basename(frame_img_path)
-    storage.upload_file(frame_img_path, f'jobs/{user}/{id_job}/{frame_img_name}')
-    frame_url = storage.get_file_url(frame_img_name)
+    frame_img_path = f"output\\exp{exp}\\{source}.jpg"
+    storage.upload_file(frame_img_path, f'jobs/{user}/{id_job}/cam.jpg')
+    frame_url = storage.get_file_url(f'jobs/{user}/{id_job}/cam.jpg')
 
     response_data = {
         "laptops": laptop_list,
