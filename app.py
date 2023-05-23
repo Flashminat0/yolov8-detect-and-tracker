@@ -201,8 +201,10 @@ class FindTheLaptop(Resource):
         try:
             json_data = request.get_json(force=True)
             image_url = json_data['image_url']
+            user = json_data['user']
+            id_job = json_data['id_job']
 
-            data = capture_to_find(image_url)
+            data = capture_to_find(image_url, user, id_job)
 
             return jsonify(data)
 

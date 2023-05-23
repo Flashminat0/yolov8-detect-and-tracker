@@ -7,7 +7,7 @@ import cv2 as cv
 from storage_service import StorageService
 
 
-def capture_to_find(image_url):
+def capture_to_find(image_url, user, id_job):
     folder, exp = run_tracking()
 
     print('tracking done ...\n')
@@ -31,7 +31,7 @@ def capture_to_find(image_url):
         # extract image name from path
         img_name = os.path.basename(max_img_path)
         # upload to Firebase
-        upload_response = storage.upload_file(max_img_path, img_name)
+        upload_response = storage.upload_file(max_img_path, f'jobs/{user}/{id_job}/{img_name}')
         # get URL of uploaded image
         img_url = storage.get_file_url(img_name)
         # update values with new URL
@@ -41,7 +41,7 @@ def capture_to_find(image_url):
     # Upload the frame image
     frame_img_path = f"output\\exp{exp}\\0.jpg"
     frame_img_name = os.path.basename(frame_img_path)
-    storage.upload_file(frame_img_path, frame_img_name)
+    storage.upload_file(frame_img_path, f'jobs/{user}/{id_job}/{frame_img_name}')
     frame_url = storage.get_file_url(frame_img_name)
 
     response_data = {
