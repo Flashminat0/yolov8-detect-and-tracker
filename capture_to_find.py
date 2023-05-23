@@ -31,9 +31,9 @@ def capture_to_find(image_url, user, id_job):
         # extract image name from path
         img_name = os.path.basename(max_img_path)
         # upload to Firebase
-        upload_response = storage.upload_file(max_img_path, f'jobs/{user}/{id_job}/{img_name}')
+        upload_response = storage.upload_file(max_img_path, f'jobs/{user}/{id_job}/{laptop}.jpg')
         # get URL of uploaded image
-        img_url = storage.get_file_url(f'jobs/{user}/{id_job}/{img_name}')
+        img_url = storage.get_file_url(f'jobs/{user}/{id_job}/{laptop}.jpg')
         # update values with new URL
         values['max_img_path'] = img_url
         laptop_list.append(values)
