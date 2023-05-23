@@ -106,7 +106,6 @@ def crop_and_save(intersecting_boxes, img, save_path, class_id_list, save_only=N
             save_path_with_index = str(save_path).replace(".jpg", f"_{class_id_list[i]}_{j}.jpg")
 
             if prod:
-                # save_path_with_index = str(save_path).split('\\')[:-1] + '\\' + save_path_with_index.split("\\")[-1]
                 save_path_with_index = 'output/' + '\\'.join(str(save_path).split('\\')[1:3]) + '/' + \
                                        save_path_with_index.split("\\")[-1]
 

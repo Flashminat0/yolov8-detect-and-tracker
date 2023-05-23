@@ -5,12 +5,12 @@ from pathlib import Path
 def run_tracker():
     # Define the arguments for the run function
     args = {
-        'source': 'assets/rec/IMG_3370.MOV',  # Use a video file
-        # 'source': '0',
+        # 'source': 'assets/rec/IMG_3370.MOV',  # Use a video file
+        'source': '0',
         'yolo_weights': Path('yolov8x.pt'),
         'tracking_method': 'bytetrack',
-        # 'show_vid': True,
-        'save_vid': True,
+        'show_vid': True,
+        # 'save_vid': True,
         # 'save_crop': True,
         'save_overlaps': True,
         'active_tracking_class': [63],
@@ -33,3 +33,7 @@ def run_tracker():
 
     # Call the run function
     run(**args)
+
+
+# Call the function
+run_tracker()
