@@ -29,7 +29,6 @@ if str(ROOT / 'trackers' / 'strongsort') not in sys.path:
 
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-import logging
 from yolov8.ultralytics.nn.autobackend import AutoBackend
 from yolov8.ultralytics.yolo.data.dataloaders.stream_loaders import LoadImages, LoadStreams
 from yolov8.ultralytics.yolo.data.utils import IMG_FORMATS, VID_FORMATS
@@ -41,7 +40,6 @@ from yolov8.ultralytics.yolo.utils.ops import Profile, non_max_suppression, scal
     process_mask_native
 from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
 from trackers.multi_tracker_zoo import create_tracker
-from itertools import combinations
 
 
 def check_bbox_intersection(active_bbox_list, non_active_bbox_list, dist_thres):
@@ -159,7 +157,8 @@ def run(
         save_txt=False,  # save results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
-        save_overlaps=False,  # save overlaps to images in -
+        save_overlaps=False,  # save overlaps to images in
+        save_overlaps_as_text_only=False,  # save overlaps as text only (not as images)
         save_only=None,  # save active class or non-active class
         save_trajectories=False,  # save trajectories for each track
         save_vid=False,  # save confidences in --save-txt labels
@@ -380,17 +379,19 @@ def run(
                             bbox_top = output[1]
                             bbox_w = output[2] - output[0]
                             bbox_h = output[3] - output[1]
-                            # Write MOT compliant results to file
+
                             with open(txt_path + '.txt', 'a') as f:
-                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                               bbox_top, bbox_w, bbox_h, -1, -1, -1, i))
+                                f.write(
+                                    f'{frame_idx + 1} | {id} {int(cls)} | {round(float(bbox_left), 3)} {round(float(bbox_top), 3)} {round(float(bbox_w), 3)} {round(float(bbox_h), 3)}\n')
+                                # f.write(
+                                #     ('%g ' * 10 + '\n') % (frame_idx + 1, '|', cls, id, '|', bbox_left,
+                                #                            bbox_top, bbox_w, bbox_h))
 
                         if save_vid or save_crop or show_vid:  # Add bbox/seg to image
                             c = int(cls)  # integer class
                             id = int(id)  # integer id
-                            label = None if hide_labels else (f'{names[c]} {id}' if hide_conf else \
-                                                                  (
-                                                                      f'{id} {conf:.2f}' if hide_class else f'{names[c]} {id} {conf:.2f}'))
+                            label = None if hide_labels else (f'{names[c]} {id}' if hide_conf else (
+                                f'{id} {conf:.2f}' if hide_class else f'{names[c]} {id} {conf:.2f}'))
                             color = colors(c, True)
                             annotator.box_label(bbox, label, color=color)
 
@@ -437,6 +438,10 @@ def run(
                                 image = im0s
 
                             crop_and_save(intersecting_bbox_list, image, o_save_path, second_elements, save_only, prod)
+
+                    # save cropped images text data
+                    if save_overlaps_as_text_only:
+                        print(f'Frame {frame_idx}: {outputs[i]}')
 
             else:
                 pass
@@ -507,6 +512,7 @@ def parse_opt():
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
     parser.add_argument('--save-overlaps', action='store_true', help='save cropped prediction boxes')
+    parser.add_argument('--save-overlaps-as-text-only', action='store_true', help='save cropped prediction boxes')
     parser.add_argument('--save-only', type=str, help='save active class or non-active class')
     parser.add_argument('--save-trajectories', action='store_true', help='save trajectories for each track')
     parser.add_argument('--save-vid', action='store_true', help='save video tracking results')

@@ -5,7 +5,7 @@ from pathlib import Path
 def run_tracking():
     # Define the arguments for the run function
     args = {
-        'source': 1,
+        'source': 0,
         'yolo_weights': Path('yolov8x.pt'),
         'tracking_method': 'bytetrack',
         'save_crop': True,
