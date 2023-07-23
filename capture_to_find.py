@@ -4,7 +4,7 @@ from crop_active import run_tracking
 from similarity_checker import compare_laptop_images
 import cv2 as cv
 
-from storage_service import StorageService
+from controllers.storage_service import StorageService
 
 
 def capture_to_find(image_url, user, id_job):

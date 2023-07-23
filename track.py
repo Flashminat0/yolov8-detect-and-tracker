@@ -382,10 +382,8 @@ def run(
 
                             with open(txt_path + '.txt', 'a') as f:
                                 f.write(
-                                    f'{frame_idx + 1} | {id} {int(cls)} | {round(float(bbox_left), 3)} {round(float(bbox_top), 3)} {round(float(bbox_w), 3)} {round(float(bbox_h), 3)}\n')
-                                # f.write(
-                                #     ('%g ' * 10 + '\n') % (frame_idx + 1, '|', cls, id, '|', bbox_left,
-                                #                            bbox_top, bbox_w, bbox_h))
+                                    f'{frame_idx + 1} {id} {int(cls)} {round(float(bbox_left), 3)} {round(float(bbox_top), 3)} {round(float(bbox_w), 3)} {round(float(bbox_h), 3)}\n')
+
 
                         if save_vid or save_crop or show_vid:  # Add bbox/seg to image
                             c = int(cls)  # integer class
@@ -517,7 +515,7 @@ def parse_opt():
     parser.add_argument('--save-trajectories', action='store_true', help='save trajectories for each track')
     parser.add_argument('--save-vid', action='store_true', help='save video tracking results')
     parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
-    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
+    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven // use the coco yml file
     parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --classes 0, or --classes 0 2 3')
     parser.add_argument('--active-tracking-class', nargs='+', type=int, help='active tracking classes')
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')

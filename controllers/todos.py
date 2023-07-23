@@ -2,19 +2,8 @@ import json
 from firebase_admin import credentials, db, initialize_app
 
 # Load appsettings JSON file
-with open('appsettings.json', 'r') as json_file:
+with open('controllers/appsettings.json', 'r') as json_file:
     appsettings = json.load(json_file)
-
-# Firebase-APIKey File
-API_KEY_PATH = "firebase-api-key.json"  # Add your API file path
-
-# Initialize the default firebase app
-certificate = credentials.Certificate(API_KEY_PATH)
-firebaseApp = initialize_app(certificate, {
-    'databaseURL': appsettings['DatabaseURL'],
-    'storageBucket': appsettings['StorageURL'],
-})
-
 
 class ToDoCollection:
     def __init__(self):

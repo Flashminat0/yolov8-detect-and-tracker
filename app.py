@@ -1,17 +1,37 @@
 import os
+import json
+from firebase_admin import credentials, initialize_app
 
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_restful import Api, Resource
 from werkzeug.utils import secure_filename
 
+# functions
 from capture_to_find import capture_to_find
-from firebase_service import ToDoCollection
-from storage_service import StorageService
+from controllers.notifications import NotificationCollection
+from controllers.storage_service import StorageService
+# controllers
+from controllers.todos import ToDoCollection
 
 app = Flask(__name__)
 CORS(app, support_credentials=True)
 api = Api(app)
+
+# Load appsettings JSON file
+appsettings = None
+with open('controllers/appsettings.json', 'r') as json_file:
+    appsettings = json.load(json_file)
+
+# Firebase-APIKey File
+API_KEY_PATH = "controllers/firebase-api-key.json"
+
+# Initialize the default firebase app
+certificate = credentials.Certificate(API_KEY_PATH)
+firebaseApp = initialize_app(certificate, {
+    'databaseURL': appsettings['DatabaseURL'],
+    'storageBucket': appsettings['StorageURL'],
+})
 
 
 class HealthCheck(Resource):
@@ -216,4 +236,5 @@ api.add_resource(FindTheLaptop, '/findTheLaptop')
 
 if __name__ == "__main__":
     todo = ToDoCollection()
+    notification = NotificationCollection()
     app.run(debug=True)  # Make sure debug is false on production environment
