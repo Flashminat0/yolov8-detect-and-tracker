@@ -2,6 +2,8 @@ from track import run
 from pathlib import Path
 
 
+# this is to get the laptops from the video
+
 def run_tracking():
     # Define the arguments for the run function
     args = {

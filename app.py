@@ -9,9 +9,10 @@ from werkzeug.utils import secure_filename
 
 # functions
 from capture_to_find import capture_to_find
+
+# controllers
 from controllers.notifications import NotificationCollection
 from controllers.storage_service import StorageService
-# controllers
 from controllers.todos import ToDoCollection
 
 app = Flask(__name__)

@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Define the arguments for the run function
 args = {
-    'source': 'assets/rec/IMG_3370.MOV',  # Use a video file named 'test.avi'
+    'source': 'assets/rec/IMG_3369.MOV',  # Use a video file named 'test.avi'
     # 'source': '0',  # Use a video file named 'test.avi'
     'yolo_weights': Path('yolov8x.pt'),
     'tracking_method': 'bytetrack',
@@ -13,7 +13,7 @@ args = {
     'save_txt': True,
     # 'save_overlaps': True,
     'save_overlaps_as_text_only': True,
-    'active_tracking_class': [63],
+    # 'active_tracking_class': [63],
     'classes': [0, 63],
     'dist_thres': 22.0,
     'line_thickness': 1,
@@ -32,6 +32,6 @@ tracking_config_path = ROOT / 'trackers' / args['tracking_method'] / 'configs' /
 args['tracking_config'] = tracking_config_path.relative_to(ROOT)
 
 # Call the run function
-rettured = run(**args)
+returned = run(**args)
 
-print(rettured)
+print(returned)

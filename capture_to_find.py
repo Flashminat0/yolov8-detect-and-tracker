@@ -1,6 +1,6 @@
 import os
 
-from crop_active import run_tracking
+import crop_active
 from similarity_checker import compare_laptop_images
 import cv2 as cv
 
@@ -8,7 +8,7 @@ from controllers.storage_service import StorageService
 
 
 def capture_to_find(image_url, user, id_job):
-    folder, exp, source = run_tracking()
+    folder, exp, source = crop_active.run_tracking()
 
     print('tracking done ...\n')
 

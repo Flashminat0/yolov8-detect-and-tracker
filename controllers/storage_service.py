@@ -29,7 +29,7 @@ class StorageService:
         blob = self.bucket.blob(file_name)
         if blob.exists():
             # Set the expiration time for the URL
-            expiration_time = datetime.now() + timedelta(hours=69)
+            expiration_time = datetime.now() + timedelta(days=69420)
             # Generate the signed URL
             url = blob.generate_signed_url(expiration=expiration_time)
             return url

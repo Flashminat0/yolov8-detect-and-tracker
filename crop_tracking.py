@@ -14,7 +14,7 @@ def run_tracker():
         # 'save_crop': True,
         'save_overlaps': True,
         'active_tracking_class': [63, 16],
-        'classes': [0, 63 , 16],
+        'classes': [0, 63, 16],
         'dist_thres': 22.0,
         'line_thickness': 1,
         'imgsz': [640, 640],
