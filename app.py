@@ -262,6 +262,23 @@ class CompareImages(Resource):
 api.add_resource(CompareImages, '/compareImages')
 
 
+class CompareImages2(Resource):
+    def post(self):
+        return json.dumps({
+            "laptop_image_path": "task/it20014940_laptop_1.jpg",
+            "similarity_score": 0.7151158452033997,
+            "coordinates": {
+                "x1": 39,
+                "y1": 216,
+                "x2": 237,
+                "y2": 348
+            }
+        }, indent=4)
+
+
+api.add_resource(CompareImages2, '/compareImages2')
+
+
 class FindTheLaptop(Resource):
     def post(self):
         try:
