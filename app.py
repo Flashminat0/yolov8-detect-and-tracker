@@ -1,5 +1,7 @@
 import os
 import json
+import shutil
+
 from firebase_admin import credentials, initialize_app
 
 from flask import Flask, jsonify, request
@@ -10,6 +12,7 @@ from werkzeug.utils import secure_filename
 # functions
 from capture_to_find import capture_to_find
 from capture_to_find_v2 import capture_to_find_v2
+from check_similarity import image_similarity
 
 # controllers
 from controllers.notifications import NotificationCollection
@@ -186,14 +189,14 @@ class CompareImages(Resource):
             image_from_app_name = request.files['image_from_phone']
 
             user = request.form.get('user')
-            image_2_frame = request.form.get('frame')
+            time_stamp = request.form.get('frame')
             image_2_class_idx = request.form.get('class_idx')
 
-            if not all([user, image_2_frame, image_2_class_idx]):
+            if not all([user, time_stamp, image_2_class_idx]):
                 missing = []
                 if not user:
                     missing.append('user')
-                if not image_2_frame:
+                if not time_stamp:
                     missing.append('frame')
                 if not image_2_class_idx:
                     missing.append('class_idx')
@@ -211,15 +214,35 @@ class CompareImages(Resource):
 
             data = capture_to_find_v2(user)
 
-            print(data)
-
             mobile_image_path = f'task/{user}.jpg'
-            frame_image_path = data.frame
-            laptop_images = data.laptops
+            laptop_images = data['laptops']
 
-            print(mobile_image_path)
-            print(frame_image_path)
-            print(laptop_images)
+            frame_image_path = data['frame']
+
+            laptops_with_similarities = []
+            for laptop_image in laptop_images:
+                laptop_image_to_check = f'task/{user}_laptop_{laptop_image["laptopID"]}.jpg'
+
+                similarity_score = image_similarity(mobile_image_path, laptop_image_to_check)
+
+                checked_laptop = {
+                    'laptop_image_path': laptop_image_to_check,
+                    'similarity_score': similarity_score,
+                    'coordinates': laptop_image['coordinates']
+                }
+
+                laptops_with_similarities.append(checked_laptop)
+
+            laptops_with_similarities.sort(key=lambda x: x['similarity_score'], reverse=True)
+
+            # laptop with highest similarity score
+            laptop_with_highest_similarity = laptops_with_similarities[0]
+
+            storage = StorageService()
+            response = storage.upload_file(laptop_with_highest_similarity['laptop_image_path'],
+                                           f'jobs/{user}/{time_stamp}/laptop_image.jpg')
+            #
+            # print(response)
 
             # save image from app to storage
             # storage = StorageService()
@@ -228,7 +251,9 @@ class CompareImages(Resource):
             # After upload, delete the temporary local file
             # os.remove(image_path)
 
-            return jsonify('response')
+            # shutil.rmtree(f'task/{user}')
+
+            return jsonify(laptop_with_highest_similarity)
 
         except Exception as ex:
             return str(ex), 400

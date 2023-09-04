@@ -44,7 +44,6 @@ def image_similarity(img1_path, img2_path):
 
     return similarity
 
-
 # Example usage:
-similarity_score = image_similarity("task/0.jpg", "task/it20014940.jpg")
-print("Similarity Score:", similarity_score)
+# similarity_score = image_similarity("task/0.jpg", "task/it20014940.jpg")
+# print("Similarity Score:", similarity_score)
