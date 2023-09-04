@@ -209,8 +209,17 @@ class CompareImages(Resource):
 
             image_from_app_name.save(image_path)
 
-            print('image_path' + image_path)
-            capture_to_find_v2(user)
+            data = capture_to_find_v2(user)
+
+            print(data)
+
+            mobile_image_path = f'task/{user}.jpg'
+            frame_image_path = data.frame
+            laptop_images = data.laptops
+
+            print(mobile_image_path)
+            print(frame_image_path)
+            print(laptop_images)
 
             # save image from app to storage
             # storage = StorageService()

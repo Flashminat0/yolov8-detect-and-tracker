@@ -9,6 +9,10 @@ import crop_active
 # image_url, user, id_job
 def capture_to_find_v2(userID):
     folder, exp, source = crop_active.run_tracking()
+    cap = cv2.VideoCapture(0)
+    if cap.isOpened():
+        cap.release()
+
     # source = 0
     # exp = 37
     print('tracking done ...\n')
@@ -39,7 +43,6 @@ def capture_to_find_v2(userID):
 
     for laptop_folders in os.listdir(f'runs/track/exp{exp}/crops/laptop'):
         image_count = len(os.listdir(f'runs/track/exp{exp}/crops/laptop/{laptop_folders}'))
-
 
         if image_count > 0:
             imageForAdd = os.listdir(f'runs/track/exp{exp}/crops/laptop/{laptop_folders}')[int((image_count + 1) / 2)]
