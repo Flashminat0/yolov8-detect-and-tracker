@@ -1,8 +1,12 @@
 from track import run
 from pathlib import Path
 
-
 # this is to get the laptops from the video
+
+import os
+
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
 
 def run_tracking():
     # Define the arguments for the run function
@@ -10,13 +14,14 @@ def run_tracking():
         'source': 0,
         'yolo_weights': Path('yolov8x.pt'),
         'tracking_method': 'bytetrack',
+        'save_txt': True,
         'save_crop': True,
         'active_tracking_class': [63],
         'classes': [63],
         'line_thickness': 1,
         'imgsz': [640, 640],
         'stop_in_frame': 100,
-        'prod': True,
+        # 'prod': True,
     }
 
     # Set the tracking_config based on the tracking_method
@@ -29,7 +34,7 @@ def run_tracking():
     # Call the run function
     folder = run(**args)
 
-    return folder, str(folder).split('\\')[1].replace('exp', ''), args['source']
+    return folder, str(folder).split('\\')[2].replace('exp', ''), args['source']
     # output\exp249
 
 # Call the function

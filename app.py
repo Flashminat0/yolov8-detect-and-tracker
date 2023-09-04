@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 
 # functions
 from capture_to_find import capture_to_find
+from capture_to_find_v2 import capture_to_find_v2
 
 # controllers
 from controllers.notifications import NotificationCollection
@@ -130,7 +131,7 @@ class UploadImage(Resource):
             image = request.files['image']
 
             image_name = secure_filename(image.filename)
-            image_path = os.path.join('tmp', image_name)
+            image_path = os.path.join('task', image_name)
 
             os.makedirs(os.path.dirname(image_path), exist_ok=True)
 
@@ -189,26 +190,36 @@ class CompareImages(Resource):
             image_2_class_idx = request.form.get('class_idx')
 
             if not all([user, image_2_frame, image_2_class_idx]):
-                return 'Missing data in request', 400
+                missing = []
+                if not user:
+                    missing.append('user')
+                if not image_2_frame:
+                    missing.append('frame')
+                if not image_2_class_idx:
+                    missing.append('class_idx')
+                return f'Missing fields: {", ".join(missing)}', 400
 
             file_extension = image_from_app_name.filename.split('.')[-1]
 
             image_name = secure_filename(
-                user + '_' + image_2_class_idx + '.' + file_extension)
-            image_path = os.path.join('tmp', image_name)
+                user + '.' + file_extension)
+            image_path = os.path.join('task', image_name)
 
             os.makedirs(os.path.dirname(image_path), exist_ok=True)
 
             image_from_app_name.save(image_path)
 
+            print('image_path' + image_path)
+            capture_to_find_v2(user)
+
             # save image from app to storage
-            storage = StorageService()
-            response = storage.upload_file(image_path, image_name)  # Corrected this line
+            # storage = StorageService()
+            # response = storage.upload_file(image_path, image_name)  # Corrected this line
 
             # After upload, delete the temporary local file
-            os.remove(image_path)
+            # os.remove(image_path)
 
-            return jsonify(response)
+            return jsonify('response')
 
         except Exception as ex:
             return str(ex), 400

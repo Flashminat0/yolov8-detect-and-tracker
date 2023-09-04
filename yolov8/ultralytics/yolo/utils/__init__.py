@@ -302,9 +302,9 @@ def get_user_config_dir(sub_dir='Ultralytics'):
     else:
         raise ValueError(f'Unsupported operating system: {os_name}')
 
-    # GCP and AWS lambda fix, only /tmp is writeable
+    # GCP and AWS lambda fix, only /task is writeable
     if not is_dir_writeable(str(path.parent)):
-        path = Path('/tmp') / sub_dir
+        path = Path('/task') / sub_dir
 
     # Create the subdirectory if it does not exist
     path.mkdir(parents=True, exist_ok=True)

@@ -640,7 +640,7 @@ class Exporter:
             from tflite_support import metadata as _metadata  # noqa
             from tflite_support import metadata_schema_py_generated as _metadata_fb  # noqa
 
-            tmp_file = Path('/tmp/meta.txt')
+            tmp_file = Path('/task/meta.txt')
             with open(tmp_file, 'w') as meta_f:
                 meta_f.write(str(self.metadata))
 
