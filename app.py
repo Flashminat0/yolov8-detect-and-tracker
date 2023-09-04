@@ -227,7 +227,7 @@ class CompareImages(Resource):
 
                 checked_laptop = {
                     'laptop_image_path': laptop_image_to_check,
-                    'similarity_score': similarity_score,
+                    'similarity_score': float(similarity_score),
                     'coordinates': laptop_image['coordinates']
                 }
 
@@ -253,7 +253,7 @@ class CompareImages(Resource):
 
             # shutil.rmtree(f'task/{user}')
 
-            return jsonify(laptop_with_highest_similarity)
+            return json.dumps(laptop_with_highest_similarity, indent=4)
 
         except Exception as ex:
             return str(ex), 400
