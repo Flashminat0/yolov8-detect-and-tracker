@@ -10,6 +10,7 @@ from flask_cors import CORS
 from flask_restful import Api, Resource
 from werkzeug.utils import secure_filename
 
+from capture_thieves import capture_to_find_thieves
 # functions
 from capture_to_find import capture_to_find
 from capture_to_find_v2 import capture_to_find_v2
@@ -244,18 +245,6 @@ class CompareImages(Resource):
                                            f'jobs/{user}/{time_stamp}/laptop_image.jpg')
             response2 = storage.upload_file(frame_image_path, f'jobs/{user}/{time_stamp}/frame_image.jpg')
 
-            #
-            # print(response)
-
-            # save image from app to storage
-            # storage = StorageService()
-            # response = storage.upload_file(image_path, image_name)  # Corrected this line
-
-            # After upload, delete the temporary local file
-            # os.remove(image_path)
-
-            # shutil.rmtree(f'task/{user}')
-
             return json.dumps(laptop_with_highest_similarity, indent=4)
 
         except Exception as ex:
@@ -265,6 +254,7 @@ class CompareImages(Resource):
 api.add_resource(CompareImages, '/compareImages')
 
 
+# TODO: dumpy
 class CompareImages2(Resource):
     def post(self):
         return json.dumps({
@@ -300,6 +290,28 @@ class Restart(Resource):
 api.add_resource(Restart, '/restart')
 
 
+class FindThieves(Resource):
+    def post(self):
+        try:
+            json_data = request.get_json(force=True)
+
+            user = json_data['user']
+            x_1 = json_data['x1']
+            x_2 = json_data['x2']
+            y_1 = json_data['y1']
+            y_2 = json_data['y2']
+
+            data = capture_to_find_thieves(user, x_1, x_2, y_1, y_2)
+
+            return data.to_json(orient='records')[1:-1].replace('},{', '} {')
+
+        except Exception as ex:
+            return str(ex), 400
+
+
+api.add_resource(FindThieves, '/findThieves')
+
+
 class FindTheLaptop(Resource):
     def post(self):
         try:
@@ -324,8 +336,4 @@ if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
 
 
-
-
-
-
-# Restarted at 2023-09-05 11:31:20
+# Restarted at 2023-09-05 13:25:38
