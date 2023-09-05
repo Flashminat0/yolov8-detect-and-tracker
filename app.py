@@ -242,6 +242,8 @@ class CompareImages(Resource):
             storage = StorageService()
             response = storage.upload_file(laptop_with_highest_similarity['laptop_image_path'],
                                            f'jobs/{user}/{time_stamp}/laptop_image.jpg')
+            response2 = storage.upload_file(frame_image_path, f'jobs/{user}/{time_stamp}/frame_image.jpg')
+
             #
             # print(response)
 
@@ -261,6 +263,23 @@ class CompareImages(Resource):
 
 
 api.add_resource(CompareImages, '/compareImages')
+
+
+class CompareImages2(Resource):
+    def post(self):
+        return json.dumps({
+            "laptop_image_path": "task/it20014940_laptop_1.jpg",
+            "similarity_score": 0.7151158452033997,
+            "coordinates": {
+                "x1": 39,
+                "y1": 216,
+                "x2": 237,
+                "y2": 348
+            }
+        }, indent=4)
+
+
+api.add_resource(CompareImages2, '/compareImages2')
 
 
 class Restart(Resource):
@@ -304,4 +323,9 @@ if __name__ == "__main__":
     notification = NotificationCollection()
     app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
 
-# Restarted at 2023-09-05 09:41:14
+
+
+
+
+
+# Restarted at 2023-09-05 11:31:20
