@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+from datetime import datetime
 
 from firebase_admin import credentials, initialize_app
 
@@ -262,21 +263,22 @@ class CompareImages(Resource):
 api.add_resource(CompareImages, '/compareImages')
 
 
-class CompareImages2(Resource):
+class Restart(Resource):
     def post(self):
-        return json.dumps({
-            "laptop_image_path": "task/it20014940_laptop_1.jpg",
-            "similarity_score": 0.7151158452033997,
-            "coordinates": {
-                "x1": 39,
-                "y1": 216,
-                "x2": 237,
-                "y2": 348
-            }
-        }, indent=4)
+        # Remove the last line from the file
+        with open(__file__, 'r') as f:
+            lines = f.readlines()
+        with open(__file__, 'w') as f:
+            f.writelines(lines[:-1])
+
+        # Touch the restart file to trigger the reloader
+        with open(__file__, 'a') as f:
+            f.write(f"\n# Restarted at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+
+        return "Server is restarting..."
 
 
-api.add_resource(CompareImages2, '/compareImages2')
+api.add_resource(Restart, '/restart')
 
 
 class FindTheLaptop(Resource):
@@ -300,4 +302,7 @@ api.add_resource(FindTheLaptop, '/findTheLaptop')
 if __name__ == "__main__":
     todo = ToDoCollection()
     notification = NotificationCollection()
-    app.run(debug=True)  # Make sure debug is false on production environment
+    app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
+
+
+# Restarted at 2023-09-05 07:48:24
