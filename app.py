@@ -273,7 +273,7 @@ class Restart(Resource):
 
         # Touch the restart file to trigger the reloader
         with open(__file__, 'a') as f:
-            f.write(f"\n# Restarted at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"\n# Restarted at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         return "Server is restarting..."
 
@@ -304,5 +304,4 @@ if __name__ == "__main__":
     notification = NotificationCollection()
     app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
 
-
-# Restarted at 2023-09-05 07:48:24
+# Restarted at 2023-09-05 09:41:14
