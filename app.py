@@ -254,24 +254,6 @@ class CompareImages(Resource):
 api.add_resource(CompareImages, '/compareImages')
 
 
-# TODO: dumpy
-class CompareImages2(Resource):
-    def post(self):
-        return json.dumps({
-            "laptop_image_path": "task/it20014940_laptop_1.jpg",
-            "similarity_score": 0.7151158452033997,
-            "coordinates": {
-                "x1": 39,
-                "y1": 216,
-                "x2": 237,
-                "y2": 348
-            }
-        }, indent=4)
-
-
-api.add_resource(CompareImages2, '/compareImages2')
-
-
 class Restart(Resource):
     def post(self):
         # Remove the last line from the file
@@ -296,14 +278,44 @@ class FindThieves(Resource):
             json_data = request.get_json(force=True)
 
             user = json_data['user']
-            x_1 = json_data['x1']
-            x_2 = json_data['x2']
-            y_1 = json_data['y1']
-            y_2 = json_data['y2']
+            # x_1 = json_data['x1']
+            # x_2 = json_data['x2']
+            # y_1 = json_data['y1']
+            # y_2 = json_data['y2']
+            time_stamp = json_data['timestamp']
 
-            data = capture_to_find_thieves(user, x_1, x_2, y_1, y_2)
+            data = capture_to_find_thieves()
 
-            return data.to_json(orient='records')[1:-1].replace('},{', '} {')
+            storage = StorageService()
+
+            image_dict = {}
+
+            print('uploading images ...\n\n')
+            for image_url in data:
+                # extract image name from path
+                img_name = os.path.basename(image_url)
+
+                # extract ID from image name
+                _, img_id, _ = img_name.split('_')
+
+                # upload to Firebase with the new path structure
+                firebase_path = f'jobs/{user}/{time_stamp}/thieves/{img_id}/{img_name}'
+                upload_response = storage.upload_file(image_url, firebase_path)
+
+                # get URL of uploaded image
+                img_url = storage.get_file_url(firebase_path)
+
+                if img_id not in image_dict:
+                    image_dict[img_id] = []
+                image_dict[img_id].append(img_url)
+
+                print(f'\ruploadeding images: {len(sum(image_dict.values(), [])) / len(data) * 100:.2f}%', end='')
+
+            print('\nuploading done ...\n')
+
+            response_data = [{'id': int(key), 'images': value} for key, value in image_dict.items()]
+
+            return jsonify(response_data)
 
         except Exception as ex:
             return str(ex), 400
@@ -334,6 +346,5 @@ if __name__ == "__main__":
     todo = ToDoCollection()
     notification = NotificationCollection()
     app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
-
 
 # Restarted at 2023-09-05 13:25:38

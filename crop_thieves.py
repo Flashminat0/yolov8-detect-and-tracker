@@ -11,8 +11,8 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 def run_tracking():
     # Define the arguments for the run function
     args = {
-        # 'source': 'Camera Roll/WIN_20230826_10_16_28_Pro.mp4',
-        'source': '0',
+        # 'source': 'Camera Roll/WIN_20230826_10_00_44_Pro.mp4',
+        'source': '1',
         'yolo_weights': Path('yolov8x.pt'),
         'tracking_method': 'bytetrack',
         'show_vid': True,
@@ -23,7 +23,8 @@ def run_tracking():
         'dist_thres': 22.0,
         'line_thickness': 1,
         'imgsz': [640, 640],
-        'stop_in_frame': 500,
+        # TODO: THIS IS THE FRAME NUMBER TO STOP TRACKING OR TIME LIMIT
+        'stop_in_frame': 200,
         'save_only': 'active',
     }
 
@@ -39,7 +40,6 @@ def run_tracking():
 
     return folder, str(folder).split('\\')[2].replace('exp', ''), args['source']
     # output\exp249
-
 
 # Call the function
 # print(run_tracking())
