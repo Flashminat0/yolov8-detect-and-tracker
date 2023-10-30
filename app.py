@@ -377,4 +377,6 @@ if __name__ == "__main__":
     notification = NotificationCollection()
     app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
 
-# Restarted at 2023-10-30 12:12:01
+
+
+# Restarted at 2023-10-30 12:49:14
