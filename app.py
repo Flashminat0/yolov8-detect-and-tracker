@@ -5,6 +5,7 @@ from datetime import datetime
 
 from firebase_admin import credentials, initialize_app
 
+import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_restful import Api, Resource
@@ -278,10 +279,10 @@ class FindThieves(Resource):
             json_data = request.get_json(force=True)
 
             user = json_data['user']
-            # x_1 = json_data['x1']
-            # x_2 = json_data['x2']
-            # y_1 = json_data['y1']
-            # y_2 = json_data['y2']
+            x_1 = json_data['x1']
+            x_2 = json_data['x2']
+            y_1 = json_data['y1']
+            y_2 = json_data['y2']
             time_stamp = json_data['timestamp']
 
             data = capture_to_find_thieves()
@@ -342,9 +343,38 @@ class FindTheLaptop(Resource):
 
 api.add_resource(FindTheLaptop, '/findTheLaptop')
 
+
+class SendNotification(Resource):
+    def post(self):
+        try:
+            json_data = request.get_json(force=True)
+            expo_token = json_data['to']
+            title = json_data['title']
+            body = json_data['body']
+
+            url = "https://exp.host/--/api/v2/push/send"
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            payload = {
+                "to": expo_token,
+                "title": title,
+                "body": body
+            }
+
+            response = requests.post(url, json=payload, headers=headers)
+            return response.json(), response.status_code
+
+        except Exception as ex:
+            return str(ex), 400
+
+
+api.add_resource(SendNotification, '/notification/')
+
 if __name__ == "__main__":
     todo = ToDoCollection()
     notification = NotificationCollection()
     app.run(debug=True, use_reloader=True)  # Make sure debug is false on production environment
 
-# Restarted at 2023-09-05 13:25:38
+# Restarted at 2023-10-30 12:12:01

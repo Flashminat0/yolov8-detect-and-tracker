@@ -12,7 +12,7 @@ def run_tracking():
     # Define the arguments for the run function
     args = {
         # 'source': 'Camera Roll/WIN_20230826_10_00_44_Pro.mp4',
-        'source': '1',
+        'source': 0,
         'yolo_weights': Path('yolov8x.pt'),
         'tracking_method': 'bytetrack',
         'show_vid': True,
