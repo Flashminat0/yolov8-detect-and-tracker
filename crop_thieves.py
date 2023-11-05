@@ -24,7 +24,7 @@ def run_tracking():
         'line_thickness': 1,
         'imgsz': [640, 640],
         # TODO: THIS IS THE FRAME NUMBER TO STOP TRACKING OR TIME LIMIT
-        'stop_in_frame': 200,
+        'stop_in_frame': 120,
         'save_only': 'active',
     }
 

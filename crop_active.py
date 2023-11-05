@@ -20,7 +20,7 @@ def run_tracking():
         'classes': [63],
         'line_thickness': 1,
         'imgsz': [640, 640],
-        'stop_in_frame': 100,
+        'stop_in_frame': 50,
         # 'prod': True,
     }
 
